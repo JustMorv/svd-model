@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: svd-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST
+      - DB_PORT
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+    depends_on:
+      - mysql-check
+
+  mysql-check:
+    image: mysql:8.0
+    container_name: mysql-check
+    env_file:
+      - .env
+    command: ["sh", "-c", "until mysql -h ${DB_HOST} -P ${DB_PORT} -u ${DB_USER} -p${DB_PASSWORD} -e 'SELECT 1'; do echo 'Ожидание MySQL...'; sleep 5; done; echo 'MySQL готов!'"]
